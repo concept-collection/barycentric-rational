@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Plot from '../plot/Plot.tsx'
 import Legend, { type LegendItem } from '../plot/Legend.tsx'
+import More from './More.tsx'
+import SeriesToggle from './SeriesToggle.tsx'
 import { ink, series } from '../plot/palette.ts'
 import { extent, linePath, nearestIndex, padDomain, type Frame } from '../plot/scales.ts'
 import type { ExploreOut, Num } from '../engine/types.ts'
@@ -82,20 +84,27 @@ export default function InterpolantPanel({ out, showPoly, showSpline, onToggle }
   return (
     <div className="panel">
       <p className="panel-lede">
-        The rational interpolant r of equation (1) through {out.n + 1} nodes, with blend degree d = {out.d}.
-        Turn on the degree-{out.n} polynomial to see what the paper's first page is about, and the clamped
-        C<sup>2</sup> cubic spline for the comparison of Tables 3 and 4.
+        The rational interpolant r passes exactly through all {out.n + 1} data points and stays close to the
+        function f everywhere in between. The controls above change the data; the buttons below add two
+        standard alternatives fitted to the same points.
       </p>
+      <More>
+        <p>
+          This is r of equation (1) with the weights of equation (18), using blend degree d = {out.d}. The
+          degree-{out.n} polynomial through the same points is the paper's opening example: on equally spaced
+          nodes it diverges as n grows, which is Runge's phenomenon. The clamped C<sup>2</sup> cubic spline is
+          the standard the paper measures itself against in Tables 3 and 4.
+        </p>
+      </More>
 
       <div className="row-controls">
-        <label className="check">
-          <input type="checkbox" checked={showPoly} onChange={(e) => onToggle('poly', e.target.checked)} />
-          polynomial interpolant
-        </label>
-        <label className="check">
-          <input type="checkbox" checked={showSpline} onChange={(e) => onToggle('spline', e.target.checked)} />
+        <span className="field-label">compare with</span>
+        <SeriesToggle color={series.poly} on={showPoly} onChange={(on) => onToggle('poly', on)}>
+          polynomial (degree {out.n})
+        </SeriesToggle>
+        <SeriesToggle color={series.spline} on={showSpline} onChange={(on) => onToggle('spline', on)}>
           cubic spline
-        </label>
+        </SeriesToggle>
       </div>
 
       <Legend items={legend} />
@@ -124,34 +133,39 @@ export default function InterpolantPanel({ out, showPoly, showSpline, onToggle }
         )}
       </Plot>
 
-      {hi >= 0 && (
-        <div className="readout">
-          <span>
-            x = <b>{out.t[hi].toFixed(3)}</b>
-          </span>
-          <span style={{ color: ink.reference }}>
-            f = <b>{out.ft[hi].toFixed(6)}</b>
-          </span>
-          <span style={{ color: series.r }}>
-            r = <b>{at(out.r)?.toFixed(6) ?? '-'}</b>
-          </span>
-          {showPoly && (
-            <span style={{ color: series.poly }}>
-              poly = <b>{fmtSigned(at(out.rpoly))}</b>
+      {/* always rendered, so the error plot below never jumps when hovering */}
+      <div className="readout">
+        {hi >= 0 ? (
+          <>
+            <span>
+              x = <b>{out.t[hi].toFixed(3)}</b>
             </span>
-          )}
-          {showSpline && (
-            <span style={{ color: series.spline }}>
-              spline = <b>{at(out.rspline)?.toFixed(6) ?? '-'}</b>
+            <span style={{ color: ink.reference }}>
+              f = <b>{out.ft[hi].toFixed(6)}</b>
             </span>
-          )}
-        </div>
-      )}
+            <span style={{ color: series.r }}>
+              r = <b>{at(out.r)?.toFixed(6) ?? '-'}</b>
+            </span>
+            {showPoly && (
+              <span style={{ color: series.poly }}>
+                poly = <b>{fmtSigned(at(out.rpoly))}</b>
+              </span>
+            )}
+            {showSpline && (
+              <span style={{ color: series.spline }}>
+                spline = <b>{at(out.rspline)?.toFixed(6) ?? '-'}</b>
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="readout-hint">hover a plot to read values</span>
+        )}
+      </div>
 
       <h4 className="sub">Error</h4>
       <p className="panel-note">
-        r(x) &minus; f(x) on the same grid. It vanishes at every node, by construction, and the largest of
-        the bumps between them is the number Tables 1 to 4 tabulate.
+        The difference r &minus; f. It is zero at every node by construction; the largest bump between nodes
+        is the number the paper's tables report.
       </p>
       <Plot
         height={190}

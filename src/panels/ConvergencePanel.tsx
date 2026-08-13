@@ -1,6 +1,8 @@
 import Plot from '../plot/Plot.tsx'
 import Legend, { type LegendItem } from '../plot/Legend.tsx'
-import { dColor, ink, series } from '../plot/palette.ts'
+import More from './More.tsx'
+import SeriesToggle from './SeriesToggle.tsx'
+import { dColor, series } from '../plot/palette.ts'
 import { linePath, type Frame } from '../plot/scales.ts'
 import type { ConvergeOut, FuncName, NodeKind, Num } from '../engine/types.ts'
 
@@ -42,12 +44,18 @@ export default function ConvergencePanel(props: Props) {
   return (
     <div className="panel">
       <p className="panel-lede">
-        Theorem 2: for d &ge; 1 the error is O(h<sup>d+1</sup>) as h &rarr; 0, whatever the nodes look like,
-        provided f is smooth enough. On log-log axes that is a straight line of slope &minus;(d+1), and the
-        slopes measured between consecutive n are printed in the table. With uniform nodes and Runge's
-        function this reproduces Table 1; turn the spline on for Tables 3 and 4. Currently fitting{' '}
-        <b>{F_LABEL[f]}</b> on <b>{nodes}</b> nodes.
+        Refit with more and more nodes and record the largest error each time. On these log-log axes a power
+        law is a straight line, and steeper means faster convergence. Currently fitting <b>{F_LABEL[f]}</b>{' '}
+        on <b>{nodes}</b> nodes.
       </p>
+      <More>
+        <p>
+          Theorem 2: for d &ge; 1 the error is O(h<sup>d+1</sup>) as h &rarr; 0, whatever the nodes look
+          like, provided f is smooth enough. On these axes that is a line of slope &minus;(d+1), and the
+          slopes measured between consecutive n are printed in the table. With uniform nodes and Runge's
+          function this reproduces the paper's Table 1; turn the spline on for Tables 3 and 4.
+        </p>
+      </More>
 
       <div className="conv-controls">
         <div className="field">
@@ -83,20 +91,22 @@ export default function ConvergencePanel(props: Props) {
         <div className="field">
           <span className="field-label">compare with</span>
           <div className="chips">
-            <button
-              className={`chip ${showSpline ? 'on' : ''}`}
-              onClick={() => onChange({ showSpline: !showSpline })}
+            <SeriesToggle
+              color={series.spline}
+              on={showSpline}
               disabled={running}
+              onChange={(on) => onChange({ showSpline: on })}
             >
               cubic spline
-            </button>
-            <button
-              className={`chip ${showPoly ? 'on' : ''}`}
-              onClick={() => onChange({ showPoly: !showPoly })}
+            </SeriesToggle>
+            <SeriesToggle
+              color={series.poly}
+              on={showPoly}
               disabled={running}
+              onChange={(on) => onChange({ showPoly: on })}
             >
               polynomial
-            </button>
+            </SeriesToggle>
           </div>
         </div>
         <button className="primary" onClick={onRun} disabled={running}>
@@ -259,12 +269,16 @@ function ConvergenceChart({
           </tbody>
         </table>
       </div>
-      <p className="panel-note" style={{ color: ink.muted }}>
-        The order column is log(e<sub>prev</sub> / e) / log(n / n<sub>prev</sub>), so d + 1 is what Theorem 2
-        predicts for d &ge; 1. Where a row of errors stops falling, it has reached the point at which the
-        weights themselves, which grow like h<sup>&minus;d</sup>, cost more accuracy than the higher order
-        buys.
+      <p className="panel-note muted">
+        The order column is the slope measured between consecutive rows; Theorem 2 predicts d + 1.
       </p>
+      <More>
+        <p>
+          The order is log(e<sub>prev</sub> / e) / log(n / n<sub>prev</sub>). Where a row of errors stops
+          falling, it has reached the point at which the weights themselves, which grow like h
+          <sup>&minus;d</sup>, cost more accuracy than the higher order buys.
+        </p>
+      </More>
     </>
   )
 }

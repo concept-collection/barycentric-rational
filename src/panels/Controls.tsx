@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { FuncName, NodeKind } from '../engine/types.ts'
 
 export interface Settings {
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export default function Controls({ value: v, onChange, showN, busy }: Props) {
+  const [more, setMore] = useState(false)
   const dMax = Math.min(v.n, 12)
   return (
     <div className="controls">
@@ -66,31 +68,6 @@ export default function Controls({ value: v, onChange, showN, busy }: Props) {
           />
         </div>
       )}
-
-      <div className="field">
-        <span className="field-label">interval</span>
-        <div className="interval">
-          <input
-            type="number"
-            value={v.a}
-            step={1}
-            onChange={(e) => {
-              const a = Number(e.target.value)
-              if (isFinite(a) && a < v.b) onChange({ a })
-            }}
-          />
-          <span>to</span>
-          <input
-            type="number"
-            value={v.b}
-            step={1}
-            onChange={(e) => {
-              const b = Number(e.target.value)
-              if (isFinite(b) && b > v.a) onChange({ b })
-            }}
-          />
-        </div>
-      </div>
 
       {showN && (
         <div className="field grow">
@@ -145,6 +122,41 @@ export default function Controls({ value: v, onChange, showN, busy }: Props) {
           )}
         </div>
       </div>
+
+      <button
+        className="ghost more-toggle"
+        onClick={() => setMore((m) => !m)}
+        title="the interval [a, b]"
+      >
+        {more ? 'less ▴' : 'more ▾'}
+      </button>
+
+      {more && (
+        <div className="field">
+          <span className="field-label">interval</span>
+          <div className="interval">
+            <input
+              type="number"
+              value={v.a}
+              step={1}
+              onChange={(e) => {
+                const a = Number(e.target.value)
+                if (isFinite(a) && a < v.b) onChange({ a })
+              }}
+            />
+            <span>to</span>
+            <input
+              type="number"
+              value={v.b}
+              step={1}
+              onChange={(e) => {
+                const b = Number(e.target.value)
+                if (isFinite(b) && b > v.a) onChange({ b })
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

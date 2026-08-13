@@ -32,6 +32,22 @@ export default function App() {
   const [script, setScript] = useState(() => DEFAULT_METHOD.source)
   const [dirty, setDirty] = useState(false)
   const [tab, setTab] = useState<TabId>('interpolant')
+  // The editor is the point of the app for a reader of the paper, but a wall of
+  // MATLAB for anyone else, so it starts collapsed and the choice persists.
+  const [editorOpen, setEditorOpen] = useState(() => {
+    try {
+      return localStorage.getItem('br-editor-open') === '1'
+    } catch {
+      return false
+    }
+  })
+  useEffect(() => {
+    try {
+      localStorage.setItem('br-editor-open', editorOpen ? '1' : '0')
+    } catch {
+      /* private mode */
+    }
+  }, [editorOpen])
   const [settings, setSettings] = useState<Settings>({
     f: 'runge',
     fexpr: 'exp(-x.^2) .* cos(3*x)',
@@ -182,7 +198,8 @@ export default function App() {
             <a href="https://doi.org/10.1007/s00211-007-0093-y" target="_blank" rel="noreferrer">
               Numer. Math. <b>107</b> (2007) 315&ndash;331
             </a>
-            . The method is the script on the left; it runs in your browser through{' '}
+            . Every plot is computed live by a short MATLAB script you can open and edit; it runs in
+            your browser through{' '}
             <a href="https://numbl.org" target="_blank" rel="noreferrer">
               numbl
             </a>
@@ -199,7 +216,19 @@ export default function App() {
         </a>
       </header>
 
+      {!editorOpen && (
+        <button className="editor-strip" onClick={() => setEditorOpen(true)}>
+          <span aria-hidden="true">▸</span>
+          <span>
+            Open the MATLAB script that computes these plots
+            {dirty && <span className="strip-note"> (edited)</span>}
+          </span>
+          {error && <span className="strip-alert">the script failed</span>}
+        </button>
+      )}
+
       <div className="body">
+        {editorOpen && (
         <section className="left">
           <div className="script-head">
             <label className="field">
@@ -213,14 +242,19 @@ export default function App() {
                 ))}
               </select>
             </label>
-            <button
-              className="primary"
-              onClick={() => setRunToken((v) => v + 1)}
-              disabled={busy || convRunning}
-              title="⌘/Ctrl+Enter"
-            >
-              {busy || convRunning ? 'Running…' : 'Run ▶'}
-            </button>
+            <div className="script-actions">
+              <button
+                className="primary"
+                onClick={() => setRunToken((v) => v + 1)}
+                disabled={busy || convRunning}
+                title="⌘/Ctrl+Enter"
+              >
+                {busy || convRunning ? 'Running…' : 'Run ▶'}
+              </button>
+              <button className="ghost" onClick={() => setEditorOpen(false)} title="collapse the editor">
+                hide ◂
+              </button>
+            </div>
           </div>
           {method && !dirty && <p className="method-blurb">{method.blurb}</p>}
           {dirty && <p className="method-blurb edited">Edited. Pick a method above to start over.</p>}
@@ -255,6 +289,7 @@ export default function App() {
             </details>
           )}
         </section>
+        )}
 
         <section className="right">
           <nav className="tabs">

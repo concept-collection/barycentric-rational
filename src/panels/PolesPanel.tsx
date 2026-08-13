@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Plot from '../plot/Plot.tsx'
 import Legend from '../plot/Legend.tsx'
+import More from './More.tsx'
+import SeriesToggle from './SeriesToggle.tsx'
 import { ink, series, status } from '../plot/palette.ts'
 import { extent, linePath, padDomain, type Frame } from '../plot/scales.ts'
 import type { ExploreOut } from '../engine/types.ts'
@@ -58,18 +60,30 @@ export default function PolesPanel({ out, showClassical, onToggleClassical }: Pr
       </div>
 
       <p className="panel-lede">
-        Writing r as a quotient of polynomials (equation 7) puts everything on the denominator s of equation
-        (10). Its zeros are exactly the poles of r, so Theorem 1 amounts to the claim that s never crosses
-        zero.
+        A rational function can only blow up where its denominator crosses zero, so everything on this tab
+        watches the denominator of r.
       </p>
+      <More>
+        <p>
+          Writing r as a quotient of polynomials (equation 7) puts everything on the denominator s of
+          equation (10). Its zeros are exactly the poles of r, so Theorem 1 amounts to the claim that s never
+          crosses zero on the real line.
+        </p>
+      </More>
 
       <h4 className="sub">The denominator on the real line</h4>
       <p className="panel-note">
-        s(x) spans many orders of magnitude, so what is drawn is the signed n-th root of it. That leaves every
-        sign and every zero exactly where it was, and brings the rest into a range that fits on a page. The
-        range shown runs well past both ends of the interpolation interval, since Theorem 1 is a statement
-        about all of <b>R</b>, not just [a, b].
+        The denominator along the real line; the shaded band is the data interval. If this curve touched zero
+        anywhere, r would have a pole there.
       </p>
+      <More>
+        <p>
+          s(x) spans many orders of magnitude, so what is drawn is the signed n-th root of it. That leaves
+          every sign and every zero exactly where it was, and brings the rest into a range that fits on a
+          page. The range shown runs well past both ends of the interpolation interval, since Theorem 1 is a
+          statement about all of <b>R</b>, not just [a, b].
+        </p>
+      </More>
       <Plot
         height={200}
         xDomain={xd}
@@ -133,11 +147,16 @@ export default function PolesPanel({ out, showClassical, onToggleClassical }: Pr
       {p.rootsShown ? (
         <>
           <p className="panel-note">
-            The {p.rootsRe.length} roots of s in the complex plane. Theorem 1 says none of them are real, so
-            none of them touch the horizontal axis. The grey band is the interpolation interval; ticks on the
-            axis are the nodes.
-            {nOnAxis > 0 && ' Roots that have landed on the axis are marked with a cross.'}
+            All {p.rootsRe.length} roots of the denominator, in the complex plane. A root on the horizontal
+            axis would be a real pole
+            {nOnAxis > 0 ? '; the crosses mark roots that have landed there.' : ', and none of them is.'}
           </p>
+          <More>
+            <p>
+              Theorem 1 says the roots of s stay off the real line for every d and every set of distinct
+              nodes. The grey band is the interpolation interval; the ticks on the axis are the nodes.
+            </p>
+          </More>
           <Legend
             items={[
               { label: 'root of s', color: series.r, shape: 'dot' },
@@ -229,20 +248,22 @@ export default function PolesPanel({ out, showClassical, onToggleClassical }: Pr
 
       <h4 className="sub">The classical alternative</h4>
       <div className="row-controls">
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={showClassical}
-            onChange={(e) => onToggleClassical(e.target.checked)}
-          />
-          fit p<sub>M</sub> / q<sub>N</sub> with M + N = n
-        </label>
+        <span className="field-label">compare with</span>
+        <SeriesToggle color={series.classical} on={showClassical} onChange={onToggleClassical}>
+          classical rational fit p<sub>M</sub> / q<sub>N</sub>
+        </SeriesToggle>
       </div>
       <p className="panel-note">
-        The construction the paper's introduction rejects: fit the same data with a quotient of polynomials of
-        degrees M and N summing to n. It is a good approximation where it is finite, and there is no way to
-        stop it putting poles wherever it likes.
+        The textbook way to fit a rational function: one polynomial divided by another. It is often a fine
+        approximation where it is finite, and there is no way to control where its poles land.
       </p>
+      <More>
+        <p>
+          This is the construction the paper's introduction rejects: fit the same data with a quotient of
+          polynomials of degrees M and N summing to n. The dashed lines mark the real poles it put in the
+          window shown.
+        </p>
+      </More>
       {showClassical && p.classical ? (
         <>
           <Legend

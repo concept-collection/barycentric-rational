@@ -120,9 +120,7 @@ try {
   // ── the overlays ───────────────────────────────────────────────────────
   console.log('\nOverlays')
   await page.evaluate(() => {
-    document.querySelectorAll('.row-controls input[type=checkbox]').forEach((c) => {
-      if (!c.checked) c.click()
-    })
+    document.querySelectorAll('.row-controls button.tone[aria-pressed="false"]').forEach((b) => b.click())
   })
   await settle()
   const legends = await page.$$eval('.legend-item', (els) => els.map((e) => e.textContent))
@@ -159,7 +157,10 @@ try {
   check('16 roots drawn in the complex plane', roots === 16, `${roots} roots`)
 
   // ── swapping the method changes the verdict ────────────────────────────
+  // the editor starts collapsed; the method dropdown lives inside it
   console.log('\nEqual weights: the counter-example')
+  await page.evaluate(() => document.querySelector('.editor-strip')?.click())
+  await page.waitForSelector('.script-head select', { timeout: 10000 })
   await page.select('.script-head select', 'equal')
   await settle()
   await waitText('.verdict', /real pole/)

@@ -121,6 +121,34 @@ input[type='range'] {
   white-space: nowrap;
 }
 
+/* ── the collapsed-editor strip ───────────────────────── */
+.editor-strip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  background: var(--panel-2);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 7px 16px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+.editor-strip:hover:not(:disabled) {
+  background: #1a2029;
+  color: var(--text);
+}
+.strip-note {
+  color: #c98500;
+}
+.strip-alert {
+  margin-left: auto;
+  color: #ff8f8f;
+  font-weight: 600;
+}
+
 /* ── two columns ──────────────────────────────────────── */
 .body {
   display: flex;
@@ -152,6 +180,11 @@ input[type='range'] {
   justify-content: space-between;
   gap: 10px;
   padding: 10px 12px 6px;
+}
+.script-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .method-blurb {
   margin: 0;
@@ -326,6 +359,28 @@ input[type='range'] {
   border-color: #2563eb;
   color: #fff;
 }
+/* a toggle that adds a plot series: the swatch previews the curve's colour */
+.chip.tone {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.chip.tone .swatch {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--tone);
+  flex: none;
+}
+.chip.tone.on {
+  background: color-mix(in srgb, var(--tone) 20%, #151a21);
+  border-color: var(--tone);
+  color: var(--text);
+}
+.more-toggle {
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
 .interval {
   display: flex;
   align-items: center;
@@ -365,6 +420,8 @@ input[type='range'] {
 .panel {
   padding: 14px 16px 40px;
   max-width: 1000px;
+  /* centred, so the full-width layout with the editor collapsed stays balanced */
+  margin: 0 auto;
 }
 .panel-lede {
   margin: 0 0 12px;
@@ -380,6 +437,28 @@ input[type='range'] {
 }
 .panel-note.muted {
   color: var(--muted);
+}
+/* the paper-level detail, folded away until asked for */
+.more {
+  margin: -4px 0 12px;
+  font-size: 12.5px;
+}
+.more summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: 12px;
+  color: var(--accent);
+  user-select: none;
+}
+.more summary:hover {
+  text-decoration: underline;
+}
+.more-body {
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.more-body p {
+  margin: 4px 0 0;
 }
 h4.sub {
   margin: 22px 0 6px;
@@ -428,17 +507,23 @@ h4.sub {
 
 .readout {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px 18px;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--text-dim);
   padding: 4px 0 2px;
-  min-height: 22px;
+  /* fixed height: this row must never change size on hover, or everything
+     below it jumps */
+  height: 24px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .readout b {
   color: inherit;
   font-weight: 600;
+}
+.readout-hint {
+  color: var(--muted);
 }
 
 .tooltip {

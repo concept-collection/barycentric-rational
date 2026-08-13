@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import Plot from '../plot/Plot.tsx'
 import Legend from '../plot/Legend.tsx'
+import More from './More.tsx'
 import { diverging, ink, series } from '../plot/palette.ts'
 import { extent, linePath, padDomain, type Frame } from '../plot/scales.ts'
 import type { ExploreOut, Num } from '../engine/types.ts'
@@ -64,9 +65,9 @@ export default function BlendingPanel({ out }: Props) {
     return (
       <div className="panel">
         <p className="panel-lede">
-          This script does not define <code>local_blend</code>, so there is nothing to draw here. Equations (4)
-          and (5) are optional: a script only has to supply <code>bary_weights</code> and{' '}
-          <code>bary_eval</code>. The other three tabs still work.
+          This script does not define <code>local_blend</code>, so the construction cannot be drawn here.
+          That is allowed: a script only has to supply <code>bary_weights</code> and <code>bary_eval</code>,
+          and the other three tabs still work.
         </p>
         {out.blendError && <pre className="error-box">{out.blendError}</pre>}
         <WeightsSection out={out} />
@@ -88,11 +89,18 @@ export default function BlendingPanel({ out }: Props) {
   return (
     <div className="panel">
       <p className="panel-lede">
-        Equation (4) reads r = &Sigma;<sub>i</sub> &lambda;<sub>i</sub> p<sub>i</sub> / &Sigma;<sub>i</sub>{' '}
-        &lambda;<sub>i</sub>: slide a window of d+1 = {out.d + 1} nodes along the data, fit a polynomial of
-        degree {out.d} in each position, and blend the {m} of them together. Hover to follow one; click to pin
-        it.
+        The interpolant is built from {m} simple pieces: a polynomial of degree {out.d} fitted to each run of{' '}
+        {out.d + 1} neighbouring points, all blended into one smooth curve. Hover the plot to follow a single
+        piece; click to pin it.
       </p>
+      <More>
+        <p>
+          This is equation (4), r = &Sigma;<sub>i</sub> &lambda;<sub>i</sub> p<sub>i</sub> / &Sigma;
+          <sub>i</sub> &lambda;<sub>i</sub>: each p<sub>i</sub> interpolates the d+1 points x<sub>i</sub>,
+          &hellip;, x<sub>i+d</sub>, and the blending functions &lambda;<sub>i</sub> of equation (5) carry the
+          alternating signs that make the poles cancel.
+        </p>
+      </More>
 
       <div className="row-controls">
         <label className="slider-label">
@@ -173,11 +181,17 @@ export default function BlendingPanel({ out }: Props) {
 
       <h4 className="sub">Blending functions</h4>
       <p className="panel-note">
-        The normalised &lambda;<sub>i</sub>, which sum to 1 at every x. Each one is close to 1 across its own
-        window and decays away from it, but with a tail that oscillates in sign and never quite reaches zero:
-        these functions have no local support, which the paper names as the price of the construction. What
-        they do have is that their denominator never vanishes, so they are infinitely smooth.
+        How much each piece counts at each x. The blending functions sum to 1 everywhere, and each is largest
+        over its own window.
       </p>
+      <More>
+        <p>
+          Each normalised &lambda;<sub>i</sub> decays away from its window, but with a tail that oscillates in
+          sign and never quite reaches zero: these functions have no local support, which the paper names as
+          the price of the construction. What they do have is that their common denominator never vanishes, so
+          they are infinitely smooth.
+        </p>
+      </More>
       <Plot
         height={220}
         xDomain={xd}
@@ -239,10 +253,17 @@ function WeightsSection({ out }: { out: ExploreOut }) {
     <>
       <h4 className="sub">Barycentric weights</h4>
       <p className="panel-note">
-        The same interpolant, written in the form of equation (1) with the weights of equation (18). Schneider
-        and Werner proved that a pole-free barycentric rational interpolant must have weights that alternate
-        in sign; these {out.wAlternates ? 'do' : 'do not'}.
+        The whole construction collapses to a single weight per node. Alternating signs are what pole-freedom
+        requires, and these weights {out.wAlternates ? 'alternate' : 'do not alternate'}.
       </p>
+      <More>
+        <p>
+          This is the barycentric form of equation (1) with the weights of equation (18), which is how the
+          interpolant is actually evaluated. Schneider and Werner proved that a barycentric rational
+          interpolant with no poles in the interval must have weights that alternate in sign, so the sign
+          pattern here is not a coincidence.
+        </p>
+      </More>
       <Legend
         items={[
           { label: 'w_k > 0', color: diverging.pos },
