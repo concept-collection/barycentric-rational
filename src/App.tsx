@@ -33,17 +33,19 @@ export default function App() {
   const [dirty, setDirty] = useState(false)
   const [tab, setTab] = useState<TabId>('interpolant')
   // The editor is the point of the app, so it starts open; anyone who would
-  // rather have the plots alone can hide it, and that choice persists.
+  // rather have the plots alone can hide it, and that choice persists.  The key
+  // is versioned because an earlier build defaulted to collapsed and wrote a '0'
+  // that would otherwise keep overriding this default for returning visitors.
   const [editorOpen, setEditorOpen] = useState(() => {
     try {
-      return localStorage.getItem('br-editor-open') !== '0'
+      return localStorage.getItem('br-editor-open-2') !== '0'
     } catch {
       return true
     }
   })
   useEffect(() => {
     try {
-      localStorage.setItem('br-editor-open', editorOpen ? '1' : '0')
+      localStorage.setItem('br-editor-open-2', editorOpen ? '1' : '0')
     } catch {
       /* private mode */
     }
