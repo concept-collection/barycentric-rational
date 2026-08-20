@@ -32,13 +32,13 @@ export default function App() {
   const [script, setScript] = useState(() => DEFAULT_METHOD.source)
   const [dirty, setDirty] = useState(false)
   const [tab, setTab] = useState<TabId>('interpolant')
-  // The editor is the point of the app for a reader of the paper, but a wall of
-  // MATLAB for anyone else, so it starts collapsed and the choice persists.
+  // The editor is the point of the app, so it starts open; anyone who would
+  // rather have the plots alone can hide it, and that choice persists.
   const [editorOpen, setEditorOpen] = useState(() => {
     try {
-      return localStorage.getItem('br-editor-open') === '1'
+      return localStorage.getItem('br-editor-open') !== '0'
     } catch {
-      return false
+      return true
     }
   })
   useEffect(() => {
@@ -198,8 +198,8 @@ export default function App() {
             <a href="https://doi.org/10.1007/s00211-007-0093-y" target="_blank" rel="noreferrer">
               Numer. Math. <b>107</b> (2007) 315&ndash;331
             </a>
-            . Every plot is computed live by a short MATLAB script you can open and edit; it runs in
-            your browser through{' '}
+            . Every plot is computed live by the short MATLAB script on the left, which you can
+            edit; it runs in your browser through{' '}
             <a href="https://numbl.org" target="_blank" rel="noreferrer">
               numbl
             </a>

@@ -157,7 +157,7 @@ try {
   check('16 roots drawn in the complex plane', roots === 16, `${roots} roots`)
 
   // ── swapping the method changes the verdict ────────────────────────────
-  // the editor starts collapsed; the method dropdown lives inside it
+  // the editor is open by default, but reopen it if a stored preference hid it
   console.log('\nEqual weights: the counter-example')
   await page.evaluate(() => document.querySelector('.editor-strip')?.click())
   await page.waitForSelector('.script-head select', { timeout: 10000 })
